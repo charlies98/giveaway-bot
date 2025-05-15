@@ -162,4 +162,4 @@ async def on_ready():
     print(f"Bot is ready as {bot.user}")
 
 # Reemplaza "TU_TOKEN_AQUI" con el token real de tu bot
-bot.run("MTM3MTExODU1NzYwNTEzODY1Mg.G9WadP.C_yRT67Y-p4kinf7R_duucf70YjsLdH2Fe7vNg")
+bot.run("MTM3MTExODU1NzYwNTEzODY1Mg.G6nabC._pg4YqZHuP6e4Mwz4BizKIHWURkI7V5KBA7pYw")
