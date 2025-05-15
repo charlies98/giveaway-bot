@@ -3,6 +3,10 @@ from discord.ext import commands, tasks
 from discord import app_commands
 import asyncio
 from datetime import datetime, timedelta
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -37,15 +41,13 @@ class Giveaway:
     def get_embed(self):
         timestamp = int(self.end_time.timestamp())
         embed = discord.Embed(
-            title="🎉 Giveaway Time!",
+            title=f"{self.prize} Giveaway!",
             color=discord.Color.purple()
         )
-        embed.add_field(name="Prize", value=self.prize, inline=False)
         embed.add_field(name="Host", value=self.host.mention, inline=False)
         embed.add_field(name="Winners", value="1", inline=False)
         embed.add_field(name="Participants", value=str(len(self.entries)), inline=False)
         embed.add_field(name="Ends At", value=f"<t:{timestamp}:F>", inline=False)
-        embed.add_field(name="\u200b", value="Click the button below to enter!", inline=False)
         embed.set_footer(text="Good luck!")
         return embed
 
@@ -56,13 +58,13 @@ class Giveaway:
 
     async def end_giveaway(self):
         embed = self.get_embed()
-        embed.set_field_at(4, name="Ends At", value="Ended", inline=False)
+        embed.set_field_at(3, name="Ends At", value="Ended", inline=False)
         embed.add_field(name="Winner", value=f"{self.winner.mention}", inline=False)
         await self.message.edit(embed=embed, view=None)
 
         await self.message.reply(
-            f"🎁 The *{self.prize} Giveaway* has ended!\n"
-            f"🏆 The winner is *{self.winner.mention}*!\n"
+            f"🎁 The {self.prize} Giveaway has ended!\n"
+            f"🏆 The winner is {self.winner.mention}!\n"
             f"🎟 Make a ticket in support with the reason giveaway claim before {self.claim_time} "
             f"or the giveaway will be rerolled."
         )
@@ -111,7 +113,7 @@ class ParticipantsButton(discord.ui.Button):
             participants = "\n".join(
                 f"- {i + 1}. {user.mention}" for i, user in enumerate(self.giveaway.entries)
             )
-            await interaction.response.send_message(f"*Participants:*\n{participants}", ephemeral=True)
+            await interaction.response.send_message(f"Participants:\n{participants}", ephemeral=True)
 
 @tree.command(name="giveaway", description="Create a giveaway!", guild=discord.Object(id=GUILD_ID))
 @app_commands.describe(
@@ -161,5 +163,4 @@ async def on_ready():
     await tree.sync(guild=discord.Object(id=GUILD_ID))
     print(f"Bot is ready as {bot.user}")
 
-# Reemplaza "TU_TOKEN_AQUI" con el token real de tu bot
-bot.run("MTM3MTExODU1NzYwNTEzODY1Mg.G6nabC._pg4YqZHuP6e4Mwz4BizKIHWURkI7V5KBA7pYw")
+bot.run(os.getenv("TOKEN"))
