@@ -18,7 +18,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree
 
 class Giveaway:
-    def _init_(self, channel, prize, duration, winner, host, end_time, claim_time):
+    def __init__(self, channel, prize, duration, winner, host, end_time, claim_time):
         self.channel = channel
         self.prize = prize
         self.duration = duration
@@ -68,16 +68,16 @@ class Giveaway:
         )
 
 class GiveawayView(discord.ui.View):
-    def _init_(self, giveaway):
-        super()._init_(timeout=None)
+    def __init__(self, giveaway):
+        super().__init__(timeout=None)
         self.giveaway = giveaway
         self.add_item(JoinButton(giveaway))
         self.add_item(ExitButton(giveaway))
         self.add_item(ParticipantsButton(giveaway))
 
 class JoinButton(discord.ui.Button):
-    def _init_(self, giveaway):
-        super()._init_(label="🎉 Enter Giveaway", style=discord.ButtonStyle.success)
+    def __init__(self, giveaway):
+        super().__init__(label="🎉 Enter Giveaway", style=discord.ButtonStyle.success)
         self.giveaway = giveaway
 
     async def callback(self, interaction: discord.Interaction):
@@ -88,8 +88,8 @@ class JoinButton(discord.ui.Button):
             await interaction.response.send_message("You have entered the giveaway!", ephemeral=True)
 
 class ExitButton(discord.ui.Button):
-    def _init_(self, giveaway):
-        super()._init_(label="🚪 Exit Giveaway", style=discord.ButtonStyle.danger)
+    def __init__(self, giveaway):
+        super().__init__(label="🚪 Exit Giveaway", style=discord.ButtonStyle.danger)
         self.giveaway = giveaway
 
     async def callback(self, interaction: discord.Interaction):
@@ -100,8 +100,8 @@ class ExitButton(discord.ui.Button):
             await interaction.response.send_message("You are not participating in this giveaway.", ephemeral=True)
 
 class ParticipantsButton(discord.ui.Button):
-    def _init_(self, giveaway):
-        super()._init_(label="🧍 Participants", style=discord.ButtonStyle.secondary)
+    def __init__(self, giveaway):
+        super().__init__(label="🧍 Participants", style=discord.ButtonStyle.secondary)
         self.giveaway = giveaway
 
     async def callback(self, interaction: discord.Interaction):
