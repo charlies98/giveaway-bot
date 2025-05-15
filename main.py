@@ -42,13 +42,13 @@ class Giveaway:
         timestamp = int(self.end_time.timestamp())
         embed = discord.Embed(
             title=f"🎉 *{self.prize} Giveaway!*",
+            description="Click the 🎉 button to enter!",
             color=discord.Color.purple()
         )
-        embed.add_field(name="Host", value=self.host.mention, inline=False)
-        embed.add_field(name="Winners:", value="1 winner", inline=True)
-        embed.add_field(name="Participants", value=f"{len(self.entries)}", inline=True)
-        embed.add_field(name="Ends At", value=f"<t:{timestamp}:F>", inline=False)
-        embed.add_field(name="\u200b", value="Click the button below to enter!", inline=False)
+        embed.add_field(name="*Winners:", value="1*", inline=False)
+        embed.add_field(name="*Hosted by:*", value=self.host.mention, inline=False)
+        embed.add_field(name="*Ends in:*", value=f"<t:{timestamp}:R>", inline=False)
+        embed.add_field(name="*Ends at:*", value=f"<t:{timestamp}:F>", inline=False)
         embed.set_footer(text="Good luck!")
         return embed
 
@@ -58,14 +58,18 @@ class Giveaway:
         await self.message.edit(embed=embed)
 
     async def end_giveaway(self):
-        embed = self.get_embed()
-        embed.set_field_at(3, name="Ended At", value="Giveaway ended", inline=False)
-        embed.add_field(name="Winner", value=self.winner.mention, inline=False)
+        embed = discord.Embed(
+            title=f"🎉 *{self.prize} Giveaway!*",
+            color=discord.Color.red()
+        )
+        embed.add_field(name="*Winner:*", value=self.winner.mention, inline=False)
+        embed.add_field(name="*Hosted by:*", value=self.host.mention, inline=False)
+        embed.add_field(name="*Ended at:*", value=f"<t:{int(datetime.utcnow().timestamp())}:F>", inline=False)
         await self.message.edit(embed=embed, view=None)
         await self.message.reply(
             f"🎁 The *{self.prize}* Giveaway has ended!\n"
             f"🏆 The winner is {self.winner.mention}!\n"
-            f"🎟 Make a ticket in support with the reason giveaway claim before {self.claim_time} or the giveaway will be rerolled."
+            f"🎟 Make a ticket in support with the reason giveaway claim before *{self.claim_time}* or the giveaway will be rerolled."
         )
 
 class GiveawayView(discord.ui.View):
@@ -73,12 +77,11 @@ class GiveawayView(discord.ui.View):
         super()._init_(timeout=None)
         self.giveaway = giveaway
         self.add_item(JoinButton(giveaway))
-        self.add_item(ExitButton(giveaway))
         self.add_item(ParticipantsButton(giveaway))
 
 class JoinButton(discord.ui.Button):
     def _init_(self, giveaway):
-        super()._init_(label="🎉 Enter Giveaway", style=discord.ButtonStyle.success)
+        super()._init_(label="🎉 0", style=discord.ButtonStyle.blurple)
         self.giveaway = giveaway
 
     async def callback(self, interaction: discord.Interaction):
@@ -86,23 +89,13 @@ class JoinButton(discord.ui.Button):
             await interaction.response.send_message("You already entered this giveaway!", ephemeral=True)
         else:
             self.giveaway.entries.add(interaction.user)
+            self.label = f"🎉 {len(self.giveaway.entries)}"
+            await interaction.response.edit_message(view=self.view)
             await interaction.response.send_message("You have entered the giveaway!", ephemeral=True)
-
-class ExitButton(discord.ui.Button):
-    def _init_(self, giveaway):
-        super()._init_(label="🚪 Exit Giveaway", style=discord.ButtonStyle.danger)
-        self.giveaway = giveaway
-
-    async def callback(self, interaction: discord.Interaction):
-        if interaction.user in self.giveaway.entries:
-            self.giveaway.entries.remove(interaction.user)
-            await interaction.response.send_message("You have exited the giveaway.", ephemeral=True)
-        else:
-            await interaction.response.send_message("You are not participating in this giveaway.", ephemeral=True)
 
 class ParticipantsButton(discord.ui.Button):
     def _init_(self, giveaway):
-        super()._init_(label="🧍 Participants", style=discord.ButtonStyle.secondary)
+        super()._init_(label="Participants", style=discord.ButtonStyle.secondary)
         self.giveaway = giveaway
 
     async def callback(self, interaction: discord.Interaction):
@@ -112,7 +105,7 @@ class ParticipantsButton(discord.ui.Button):
             participants = "\n".join(
                 f"- {i + 1}. {user.mention}" for i, user in enumerate(self.giveaway.entries)
             )
-            await interaction.response.send_message(f"Participants:\n{participants}", ephemeral=True)
+            await interaction.response.send_message(f"*Participants:*\n{participants}", ephemeral=True)
 
 @tree.command(name="giveaway", description="Create a giveaway!", guild=discord.Object(id=GUILD_ID))
 @app_commands.describe(
